@@ -1,5 +1,6 @@
 # Local_Pan
-<img width="1555" height="1014" alt="image" src="https://github.com/user-attachments/assets/a6d5a495-e21d-4830-ba18-0c674f661d5d" />
+<img width="1471" height="1328" alt="image" src="https://github.com/user-attachments/assets/d63b7784-40b1-4085-a08b-a957d5e3d1d2" />
+
 
 ## 简介
 
