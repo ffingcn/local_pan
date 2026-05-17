@@ -1,0 +1,3444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加载中...</title>
+    <link id="favicon" rel="icon" href="/static/img/default-favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/static/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --secondary-color: #e5e7eb;
+            --danger-color: #dc2626;
+            --danger-hover: #b91c1c;
+            --bg-color: #f9fafb;
+            --sidebar-bg: rgba(255, 255, 255, 0.7);
+            --content-bg: rgba(255, 255, 255, 0.85);
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: rgba(255, 255, 255, 0.3);
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.15);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-bg: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 50%, #e0c3fc 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+            background: var(--gradient-bg);
+            background-attachment: fixed;
+            color: var(--text-primary); 
+            min-height: 100vh;
+            display: flex;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+        #mainApp {
+            display: flex;
+            width: calc(100% - 40px);
+            max-width: 1400px;
+            min-width: 800px;
+            min-height: calc(100vh - 40px);
+            height: calc(100vh - 40px);
+            margin: 20px auto;
+            border-radius: 24px;
+            overflow: auto;
+            position: relative;
+            z-index: 1;
+        }
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-x: auto;
+        }
+        .top-bar {
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: transparent;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-area i {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+        .logo-area span {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            position: relative;
+            margin-right: 10px;
+        }
+        .search-box input {
+            width: 0;
+            padding: 0;
+            border: 1px solid transparent;
+            border-radius: 12px 0 0 12px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+        .search-box input.expanded {
+            width: 220px;
+            padding: 10px 16px;
+            border-color: var(--glass-border);
+            opacity: 1;
+        }
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--glass-border);
+            background: rgba(255, 255, 255, 0.55);
+        }
+        .search-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            cursor: pointer;
+            color: var(--primary-color);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-left: -1px;
+        }
+        .search-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .top-action-btn {
+            width: 42px;
+            height: 42px;
+            border: none;
+            border-radius: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+            border: 1px solid var(--glass-border);
+        }
+        .top-action-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .main-area {
+            flex: 1;
+            padding: 12px 24px;
+            display: flex;
+            flex-direction: column;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        .main-area-content {
+            flex: 1;
+            overflow-x: auto;
+            overflow-y: hidden;
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .copyright-footer {
+            padding: 20px 24px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            padding: 8px 12px;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            width: fit-content;
+        }
+        .toolbar .toolbar-btn {
+            all: unset;
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: transparent;
+            color: var(--primary-color);
+            border: none;
+            outline: none;
+            box-shadow: none;
+        }
+        .toolbar .toolbar-btn:hover {
+            background: transparent;
+            color: var(--primary-color);
+            border: none;
+            outline: none;
+            box-shadow: none;
+        }
+        .toolbar .toolbar-btn i {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 22px;
+            text-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+        }
+        .toolbar .toolbar-btn:hover i {
+            transform: scale(1.15);
+            text-shadow: 0 4px 16px rgba(99, 102, 241, 0.5);
+            color: var(--primary-hover);
+        }
+        button[class*="btn-"] {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+        }
+        .btn-secondary {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #f00404 0%, #c27c7c 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(62, 62, 62, 0.4);
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+        }
+        .toolbar .btn-danger,
+        .toolbar button.btn-danger {
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+            border-width: 0 !important;
+            border-style: none !important;
+            border-color: transparent !important;
+            background: transparent !important;
+            color: var(--primary-color) !important;
+        }
+        .toolbar .btn-danger:hover,
+        .toolbar button.btn-danger:hover {
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+        .file-table-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            overflow: auto;
+            position: relative;
+            box-shadow: var(--shadow);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            min-width: 100%;
+        }
+        .file-table-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            border-top: none;
+        }
+        .file-table-header {
+            border-radius: 16px 16px 0 0;
+            border-bottom: none;
+        }
+        .file-table-header th:last-child {
+            border-radius: 0 16px 0 0;
+        }
+        .file-table-body {
+            border-radius: 0 0 16px 16px;
+            border-top: none;
+        }
+        .file-table-body tr:first-child td {
+            border-top: none;
+        }
+        .upload-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .upload-area.dragover {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .upload-area i {
+            font-size: 72px;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+        .upload-area p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        .file-table {
+            width: 100%;
+            min-width: 800px;
+            border-collapse: collapse;
+        }
+        .file-table th,
+        .file-table td {
+            padding: 16px 24px;
+            text-align: left;
+        }
+        .file-table th {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .file-table th:first-child {
+            width: 40px;
+        }
+        .file-table th:nth-child(2) {
+            width: auto;
+        }
+        .file-table th:nth-child(3) {
+            width: 120px;
+        }
+        .file-table th:nth-child(4) {
+            width: 180px;
+        }
+        .file-table th:nth-child(5),
+        .file-table td:nth-child(5) {
+            text-align: right;
+            width: 160px;
+        }
+        .file-table td:first-child {
+            width: 40px;
+        }
+        .file-table td:nth-child(3) {
+            width: 120px;
+            text-align: right;
+        }
+        .file-table td:nth-child(4) {
+            width: 180px;
+            text-align: right;
+        }
+        .file-table tr {
+            border-bottom: 1px solid var(--glass-border);
+            transition: all 0.2s ease;
+            background: transparent;
+        }
+        .file-table tr:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        .file-table tr.selected {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        .file-table tr:last-child {
+            border-bottom: none;
+        }
+        .file-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #374151;
+        }
+        .file-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .file-icon {
+            font-size: 20px;
+            position: relative;
+        }
+        .file-lock-icon {
+            font-size: 10px;
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            color: #e275ea;
+        }
+        .file-name {
+            font-weight: 500;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .file-path {
+            color: var(--text-secondary);
+            font-weight: normal;
+        }
+        .file-size,
+        .file-modified {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .file-actions {
+            display: flex;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .file-table tr:hover .file-actions {
+            opacity: 1;
+        }
+        .file-action-btn {
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--glass-border);
+        }
+        .file-action-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .upload-area {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px dashed var(--glass-border);
+            border-radius: 16px;
+            padding: 48px;
+            text-align: center;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.01);
+        }
+        .upload-area input {
+            display: none;
+        }
+        .upload-btn {
+            padding: 12px 24px;
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            padding: 32px;
+            border-radius: 20px;
+            width: 440px;
+            max-width: 90%;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .modal-content h3 {
+            margin-bottom: 24px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .modal-content input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .modal-content input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .settings-modal-content {
+            width: 500px;
+            height: 520px;
+            position: relative;
+        }
+        .settings-modal-content .modal-actions {
+            position: absolute;
+            bottom: 32px;
+            right: 32px;
+        }
+        .settings-modal-content .tab-content {
+            padding-bottom: 60px;
+        }
+        .toast {
+            position: fixed;
+            top: 122px;
+            right: 24px;
+            padding: 16px 28px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            color: var(--text-primary);
+            border-radius: 14px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            z-index: 10001;
+            animation: slideInRight 0.4s ease;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+        }
+        .toast.show {
+            display: block;
+        }
+        .toast.success {
+            border-left: 4px solid var(--success-color);
+        }
+        .toast.error {
+            border-left: 4px solid var(--error-color);
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .settings-section {
+            background: transparent;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .settings-section h3 {
+            margin-bottom: 20px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .settings-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            height: 38px;
+        }
+        .settings-row.pair-first {
+            margin-bottom: 1px;
+        }
+        .settings-row.pair-second {
+            margin-bottom: 40px;
+        }
+        .settings-row label {
+            width: 120px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            height: 38px;
+            line-height: 38px;
+        }
+        .settings-row input {
+            flex: 1;
+            height: 38px;
+            line-height: 38px;
+            padding: 0 14px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-sizing: border-box;
+            border-spacing: 0;
+            margin: 0;
+        }
+        .settings-row input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .settings-row input[type="number"]::-webkit-outer-spin-button,
+        .settings-row input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+            height: 100%;
+        }
+        .settings-row input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+        .settings-row input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            cursor: pointer;
+            opacity: 0.6;
+        }
+        .settings-row input[type="number"]::-webkit-inner-spin-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 1;
+        }
+        .settings-row span {
+            padding: 10px 0;
+            display: inline-block;
+        }
+        .settings-row input:disabled {
+            background: rgba(189, 189, 189, 0.5);
+            cursor: not-allowed;
+            color: #999;
+        }
+        .hidden {
+            display: none;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 24px;
+        }
+        .tab {
+            padding: 12px 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            position: relative;
+            transition: all 0.2s;
+            flex: 1;
+            text-align: center;
+        }
+        .tab:hover {
+            color: var(--primary-color);
+        }
+        .tab.active {
+            color: var(--primary-color);
+        }
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-1);
+            border-radius: 3px 3px 0 0;
+        }
+        .tab-content {
+            display: none;
+            min-height: 260px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .info-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 20px 24px;
+            border-radius: 14px;
+            margin-top: 24px;
+            font-size: 13px;
+            border: 1px solid var(--glass-border);
+        }
+        .info-box strong {
+            color: var(--text-primary);
+        }
+        .info-box code {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--primary-color);
+            border: 1px solid var(--glass-border);
+        }
+        .upload-progress {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 32px;
+            width: 440px;
+            max-height: 40vh;
+            overflow-y: auto;
+            z-index: 10000;
+            display: none;
+        }
+        .upload-progress.active {
+            display: block;
+        }
+        .upload-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .upload-progress-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+        .upload-progress-close {
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 20px;
+            transition: color 0.2s;
+        }
+        .upload-progress-close:hover {
+            color: var(--text-primary);
+        }
+        .upload-item {
+            margin-bottom: 16px;
+        }
+        .upload-item:last-child {
+            margin-bottom: 0;
+        }
+        .upload-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        .upload-item-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        .upload-item-size {
+            color: var(--text-secondary);
+            margin-left: 14px;
+        }
+        .upload-cancel-btn {
+            padding: 4px 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 6px;
+            color: #ef4444;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: 10px;
+        }
+        .upload-cancel-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+        .upload-progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        .upload-progress-fill {
+            height: 100%;
+            background: var(--gradient-1);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        .upload-item-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+        .history-item {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .history-item:last-child {
+            margin-bottom: 0;
+        }
+        .history-item-action {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 70px;
+            margin-right: 16px;
+        }
+        .history-item-target {
+            font-size: 13px;
+            color: var(--text-secondary);
+            flex: 1;
+            text-align: left;
+            margin-right: 16px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+        }
+        .history-item-time {
+            font-size: 13px;
+            color: var(--text-secondary);
+            width: 160px;
+            text-align: right;
+        }
+        .history-item-status {
+            width: 30px;
+            text-align: center;
+            font-size: 16px;
+        }
+        .history-status-success {
+            color: #22c55e;
+        }
+        .history-status-fail {
+            color: #ef4444;
+        }
+        .history-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        .history-empty i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .share-item {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+        .share-item:last-child {
+            margin-bottom: 0;
+        }
+        .share-checkbox-wrapper {
+            flex-shrink: 0;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            min-height: 18px;
+        }
+        .share-checkbox-wrapper input[type="checkbox"] {
+            width: 18px !important;
+            height: 18px !important;
+            cursor: pointer !important;
+            accent-color: var(--primary-color) !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
+            flex-shrink: 0;
+        }
+        .share-item-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+        .share-item-path {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            margin-right: 16px;
+        }
+        .share-item-time {
+            font-size: 13px;
+            color: var(--text-secondary);
+            width: 160px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .share-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--glass-border);
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .share-header-checkbox {
+            flex-shrink: 0;
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .share-header-checkbox input[type="checkbox"] {
+            width: 18px !important;
+            height: 18px !important;
+            cursor: pointer !important;
+            accent-color: var(--primary-color) !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
+        }
+        .share-header-path {
+            flex: 1;
+            margin-right: 16px;
+        }
+        .share-header-time {
+            width: 160px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        ::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--gradient-1);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-hover);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+        }
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.6;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .login-box {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 44px;
+            border-radius: 24px;
+            width: 400px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            text-align: center;
+            position: relative;
+        }
+        .login-box .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            z-index: 10;
+        }
+        .close-btn {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: rotate(90deg);
+        }
+        .login-box h2 {
+            margin-bottom: 32px;
+            font-size: 24px;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .login-box input {
+            width: 100%;
+            height: 38px;
+            line-height: 38px;
+            padding: 0 14px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-sizing: border-box;
+        }
+        .login-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .login-box button {
+            width: 100%;
+            padding: 16px;
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+        .login-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+        }
+        .remember-me {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        .remember-me input[type="checkbox"] {
+            width: auto;
+            height: auto;
+            margin: 0 8px 0 0;
+            padding: 0;
+            cursor: pointer;
+            accent-color: #6b7280;
+            border: none;
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: #e5e7eb;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        .file-table th .sort-icon {
+            margin-left: 6px;
+            opacity: 0.3;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .file-table th .sort-icon:hover {
+            opacity: 0.7;
+        }
+        .file-table th .sort-icon.active {
+            opacity: 1;
+        }
+        .file-table th .sort-icon.asc::after {
+            content: '\f0de';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+        }
+        .file-table th .sort-icon.desc::after {
+            content: '\f0dd';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+        }
+        .file-table th.sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+        .file-table th.sortable:hover {
+            background: #f3f4f6;
+        }
+        .breadcrumb {
+            font-size: 14px;
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+        }
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        .breadcrumb span {
+            margin: 0 8px;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .loading-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+        .loading-spinner {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, transparent, var(--primary-color));
+            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #fff 0);
+            mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #fff 0);
+            animation: spin 1.5s linear infinite;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .loading-ring {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 3px solid transparent;
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 2s linear infinite;
+            opacity: 0.5;
+        }
+        .loading-ring:nth-child(2) {
+            animation-direction: reverse;
+            animation-duration: 2.5s;
+            border-top-color: #818cf8;
+        }
+        .loading-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .loading-dots {
+            display: flex;
+            gap: 4px;
+        }
+        .loading-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            animation: dotPulse 1.4s ease-in-out infinite both;
+        }
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        .loading-dot:nth-child(3) { animation-delay: 0s; }
+        @keyframes dotPulse {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        .loading-content {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-container">
+            <div class="loading-content">
+                <div class="loading-ring"></div>
+                <div class="loading-ring"></div>
+                <div class="loading-spinner"></div>
+            </div>
+            <div class="loading-text">
+                <span></span>
+                <span class="loading-dots">
+                    <span class="loading-dot"></span>
+                    <span class="loading-dot"></span>
+                    <span class="loading-dot"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div id="loginScreen" class="login-screen" style="display: none;">
+        <div class="login-box">
+            <h2 id="loginTitle">文件管理器</h2>
+            <button class="close-btn" style="background: #f3f4f6; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 16px; cursor: pointer; color: #6b7280; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onclick="closeLoginScreen()"><i class="fas fa-times"></i></button>
+            <input type="text" id="loginUsername" placeholder="请输入用户名">
+            <input type="password" id="loginPassword" placeholder="请输入密码">
+            <label class="remember-me">
+                <input type="checkbox" id="rememberMe">
+                <span>记住密码</span>
+            </label>
+            <button onclick="login()">登 录</button>
+        </div>
+    </div>
+    <div id="mainApp">
+        <div class="content">
+            <div class="top-bar">
+                <div class="logo-area">
+                    <img id="siteLogo" src="" alt="" style="display: none; width: 32px; height: 32px; border-radius: 8px;">
+                    <i id="siteIcon" class="fas fa-folder-open"></i>
+                    <span id="siteName">加载中...</span>
+                </div>
+                <div class="top-actions" id="topActions">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="请输入关键词！" onkeydown="handleSearchKey(event)">
+                        <button class="search-btn" title="搜索" onclick="toggleSearch()"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="main-area">
+                <div class="toolbar" id="mainToolbar"></div>
+                <div class="main-area-content">
+                    <div class="breadcrumb" id="breadcrumb"></div>
+                    <div class="file-table-container" id="fileList" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>拖拽文件或文件夹到此处上传</p>
+                        </div>
+                        <table class="file-table file-table-header">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
+                                    <th class="sortable" onclick="sortBy('name')">名称<span id="sort-name" class="sort-icon"></span></th>
+                                    <th class="sortable" style="text-align:right" onclick="sortBy('size')">大小<span id="sort-size" class="sort-icon"></span></th>
+                                    <th class="sortable" style="text-align:right" onclick="sortBy('modified')">修改时间<span id="sort-modified" class="sort-icon"></span></th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                        </table>
+                        <div class="file-table-wrapper">
+                            <table class="file-table file-table-body">
+                                <tbody id="fileTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright-footer" id="copyrightFooter"></div>
+        </div>
+    </div>
+    <div class="modal" id="mkdirModal">
+        <div class="modal-content">
+            <h3>新建文件夹</h3>
+            <input type="text" id="dirnameInput" placeholder="文件夹名称">
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModal('mkdirModal')">取消</button>
+                <button class="btn-primary" onclick="createDir()">创建</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="renameModal">
+        <div class="modal-content">
+            <h3>重命名</h3>
+            <input type="text" id="renameInput" placeholder="新名称">
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModal('renameModal')">取消</button>
+                <button class="btn-primary" onclick="doRename()">确定</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="historyModal">
+        <div class="modal-content" style="width: 620px; max-height: 70vh; display: flex; flex-direction: column;">
+            <h3>操作历史</h3>
+            <div id="historyContent" style="flex: 1; overflow-y: auto; margin-bottom: 20px;"></div>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModal('historyModal')">关闭</button>
+                <button class="btn-danger" onclick="clearHistory()">清空历史</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="shareModal">
+        <div class="modal-content" style="width: 620px; max-height: 70vh; display: flex; flex-direction: column;">
+            <h3>分享链接</h3>
+            <div id="shareContent" style="flex: 1; overflow-y: auto; margin-bottom: 20px;"></div>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModal('shareModal')">关闭</button>
+                <button class="btn-danger" onclick="deleteSelectedShares()">删除选中</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="cleanupHiddenModal">
+        <div class="modal-content">
+            <h3>清理隐藏文件或目录</h3>
+            <p style="margin-bottom: 20px;">确定要清理所有隐藏文件或目录（. 开头的文件或目录）吗？此操作不可恢复。</p>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModal('cleanupHiddenModal')">取消</button>
+                <button class="btn-danger" onclick="confirmCleanupHidden()">清理</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="settingsModal">
+        <div class="modal-content settings-modal-content">
+            <h3>系统设置</h3>
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('tab1')">站点设置</button>
+                <button class="tab" onclick="switchTab('tab2')">端口设置</button>
+                <button class="tab" onclick="switchTab('tab3')">WebDAV</button>
+                <button class="tab" onclick="switchTab('tab5')">共享设置</button>
+                <button class="tab" onclick="switchTab('tab4')">访问凭证</button>
+            </div>
+            
+            <div id="tab1" class="tab-content active">
+                <div class="settings-section">
+                    <div class="settings-row">
+                        <label>站点名称：</label>
+                        <input type="text" id="settingNetworkName" value="文件管理">
+                    </div>
+                    <div class="settings-row">
+                        <label>站点Logo：</label>
+                        <input type="text" id="settingNetworkLogo" value="" placeholder="如：./img/logo.png">
+                    </div>
+                    <div class="settings-row">
+                        <label>版权年份：</label>
+                        <input type="text" id="settingCopyrightYear" value="" placeholder="如：2026">
+                    </div>
+                    <div class="settings-row">
+                        <label>版权域名：</label>
+                        <input type="text" id="settingCopyrightDomain" value="" placeholder="如：FFing.cn">
+                    </div>
+                </div>
+            </div>
+            
+            <div id="tab2" class="tab-content">
+                <div class="settings-section">
+                    <div class="settings-row">
+                        <label>HTTP端口：</label>
+                        <input type="number" id="settingPort" value="">
+                        <label style="width:auto;margin-left:12px;display:flex;align-items:center;gap:6px;">
+                            <input type="checkbox" id="settingEnableHttp" checked disabled style="width:18px;height:18px;accent-color:var(--primary-color);cursor:not-allowed;">
+                            启用
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <label>HTTPS端口：</label>
+                        <input type="number" id="settingHttpsPort" value="" placeholder="默认端口：8443">
+                        <label style="width:auto;margin-left:12px;display:flex;align-items:center;gap:6px;">
+                            <input type="checkbox" id="settingEnableHttps" style="width:18px;height:18px;accent-color:var(--primary-color);cursor:pointer;">
+                            启用
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <label>SSL证书路径：</label>
+                        <input type="text" id="settingSslCrt" value="" placeholder="如：./ssl/server.crt">
+                    </div>
+                    <div class="settings-row">
+                        <label>SSL密钥路径：</label>
+                        <input type="text" id="settingSslKey" value="" placeholder="如：./ssl/server.key">
+                    </div>
+                </div>
+            </div>
+            
+            <div id="tab3" class="tab-content">
+                <div class="settings-section">
+                    <div class="settings-row pair-first">
+                        <label>HTTP_WebDAV：</label>
+                        <input type="number" id="settingWebdavPort" value="" oninput="updateWebdavPreview()" style="flex:1;" placeholder="默认端口：5001">
+                        <label style="width:auto;margin-left:12px;display:flex;align-items:center;gap:6px;">
+                            <input type="checkbox" id="settingEnableWebdav" checked style="width:18px;height:18px;accent-color:var(--primary-color);cursor:pointer;">
+                            启用
+                        </label>
+                    </div>
+                    <div class="settings-row pair-second">
+                        <label>地址预览：</label>
+                        <span id="webdavPreview" style="color:#666;font-size:13px;">http://<span id="previewHost"></span>:<span id="previewWebdavPort">端口号</span></span>
+                    </div>
+                    
+                    <div class="settings-row pair-first">
+                        <label>HTTPS_WebDAV：</label>
+                        <input type="number" id="settingWebdavHttpsPort" value="" oninput="updateWebdavHttpsPreview()" style="flex:1;" placeholder="默认端口：5002">
+                        <label style="width:auto;margin-left:12px;display:flex;align-items:center;gap:6px;">
+                            <input type="checkbox" id="settingEnableWebdavHttps" style="width:18px;height:18px;accent-color:var(--primary-color);cursor:pointer;">
+                            启用
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <label>地址预览：</label>
+                        <span id="webdavHttpsPreview" style="color:#666;font-size:13px;">https://<span id="previewHttpsHost"></span>:<span id="previewWebdavHttpsPort">端口号</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="tab4" class="tab-content">
+                <div class="settings-section">
+                    <div class="settings-row">
+                        <label>用户名：</label>
+                        <input type="text" id="settingUsername" value="" placeholder="留空保持不变">
+                    </div>
+                    <div class="settings-row">
+                        <label>新密码：</label>
+                        <input type="password" id="settingPassword" placeholder="留空保持不变">
+                    </div>
+                </div>
+            </div>
+            
+            <div id="tab5" class="tab-content">
+                <div class="settings-section">
+                    
+                    <div class="settings-row">
+                        <label>Samba端口：</label>
+                        <input type="number" id="settingSambaPort" value="" placeholder="默认端口：445">
+                        <label style="width:auto;margin-left:12px;display:flex;align-items:center;gap:6px;">
+                            <input type="checkbox" id="settingEnableSamba" style="width:18px;height:18px;accent-color:var(--primary-color);cursor:pointer;">
+                            启用
+                        </label>
+                    </div>
+
+                    <br>
+                    <div class="settings-row">
+                        <label>FTP端口：</label>
+                        <input type="number" id="settingFtpPort" value="" placeholder="默认端口：21">
+                        <label style="width:auto;margin-left:12px;display:flex;align-items:center;gap:6px;">
+                            <input type="checkbox" id="settingEnableFtp" style="width:18px;height:18px;accent-color:var(--primary-color);cursor:pointer;">
+                            启用
+                        </label>
+                    </div>
+                    <div class="settings-row">
+                        <label>FTP被动端口：</label>
+                        <input type="number" id="settingFtpPassiveMin" value="" placeholder="50000" style="flex:1;min-width:100px;">
+                        <span style="margin:0 8px;color:var(--text-secondary);">-</span>
+                        <input type="number" id="settingFtpPassiveMax" value="" placeholder="50050" style="flex:1;min-width:100px;">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModal('settingsModal')">取消</button>
+                <button class="btn-primary" onclick="saveSettings()">保存</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="deleteConfirmModal">
+        <div class="modal-content">
+            <h3>确认删除</h3>
+            <p id="deleteConfirmText" style="margin-bottom: 20px;">确定要删除吗？</p>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModal('deleteConfirmModal')">取消</button>
+                <button class="btn-danger" onclick="confirmDelete()">删除</button>
+            </div>
+        </div>
+    </div>
+    <div id="toast" class="toast"></div>
+    <div id="uploadProgress" class="upload-progress">
+        <div class="upload-progress-header">
+            <span class="upload-progress-title"><i class="fas fa-upload"></i> 上传进度</span>
+            <span class="upload-progress-close" onclick="hideUploadProgress()">✕</span>
+        </div>
+        <div id="uploadProgressContent"></div>
+    </div>
+    <input type="file" id="fileInput" style="display:none" multiple onchange="handleFileSelect(event)">
+
+    <script>
+        let currentPath = '';
+        let auth = { username: '', password: '' };
+        let selectedItems = new Set();
+        let renameTarget = '';
+        let uploadsInProgress = {};
+        let uploadCompleteCount = 0;
+        let totalUploads = 0;
+        let uploadIdCounter = 0;
+        let hideTimeout = null;
+        let isLoggedIn = false;
+        let allFiles = [];
+        let actionHistory = JSON.parse(localStorage.getItem('actionHistory') || '[]');
+        let shareLinks = JSON.parse(localStorage.getItem('shareLinks') || '[]');
+        let pendingDeleteItems = [];
+
+        async function syncSharesFromBackend() {
+            try {
+                const response = await api('/api/shares');
+                if (response && response.ok) {
+                    const backendShares = await response.json();
+                    if (backendShares && backendShares.length > 0) {
+                        shareLinks = backendShares.map(s => ({
+                            token: s.token,
+                            path: s.path,
+                            createdAt: new Date(s.created_at).toLocaleString(),
+                            is_dir: s.is_dir || false
+                        }));
+                        localStorage.setItem('shareLinks', JSON.stringify(shareLinks));
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to sync shares from backend', e);
+            }
+        }
+        let isSearchMode = false;
+        let sortField = 'name';
+        let sortDirection = 'asc';
+        const STORAGE_KEY = 'fileManagerAuth';
+        const REMEMBER_KEY = 'fileManagerRemember';
+        const LAST_ACTIVE_KEY = 'fileManagerLastActive';
+        const SERVER_START_KEY = 'fileManagerServerStart';
+        const SESSION_TIMEOUT = 60000;
+
+        function getLastActive() {
+            const lastActive = localStorage.getItem(LAST_ACTIVE_KEY);
+            return lastActive ? parseInt(lastActive) : 0;
+        }
+
+        function setLastActive() {
+            localStorage.setItem(LAST_ACTIVE_KEY, Date.now().toString());
+        }
+
+        function isSessionValid() {
+            const lastActive = getLastActive();
+            return Date.now() - lastActive < SESSION_TIMEOUT;
+        }
+
+        function saveAuthToStorage(remember = false) {
+            const storage = remember ? localStorage : sessionStorage;
+            storage.setItem(STORAGE_KEY, JSON.stringify({
+                username: auth.username,
+                password: auth.password,
+                remember: remember
+            }));
+            if (remember) {
+                localStorage.setItem(REMEMBER_KEY, 'true');
+                setLastActive();
+            } else {
+                localStorage.removeItem(REMEMBER_KEY);
+                localStorage.removeItem(STORAGE_KEY);
+            }
+        }
+
+        function loadAuthFromStorage() {
+            let saved = sessionStorage.getItem(STORAGE_KEY);
+            let fromLocalStorage = false;
+            if (!saved) {
+                saved = localStorage.getItem(STORAGE_KEY);
+                fromLocalStorage = true;
+            }
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.remember) {
+                        document.getElementById('loginUsername').value = data.username || '';
+                        document.getElementById('loginPassword').value = data.password || '';
+                    } else {
+                        document.getElementById('loginUsername').value = '';
+                        document.getElementById('loginPassword').value = '';
+                        auth.username = '';
+                        auth.password = '';
+                    }
+                    document.getElementById('rememberMe').checked = data.remember;
+                    // 更新 auth 对象，确保上传等操作能使用正确的凭证
+                    if (data.username && data.password) {
+                        auth.username = data.username;
+                        auth.password = data.password;
+                    }
+                    if (!fromLocalStorage) {
+                        isLoggedIn = true;
+                        setLastActive();
+                        return true;
+                    }
+                    if (data.remember && isSessionValid()) {
+                        isLoggedIn = true;
+                        setLastActive();
+                        return true;
+                    }
+                    return false;
+                } catch (e) {
+                    sessionStorage.removeItem(STORAGE_KEY);
+                    localStorage.removeItem(STORAGE_KEY);
+                }
+            }
+            return false;
+        }
+
+        function clearAuthStorage() {
+            sessionStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(REMEMBER_KEY);
+            localStorage.removeItem(LAST_ACTIVE_KEY);
+        }
+
+        window.addEventListener('beforeunload', function() {
+            if (isLoggedIn) {
+                setLastActive();
+            }
+        });
+
+        async function api(path, options = {}) {
+            const fetchOptions = { ...options };
+            if (isLoggedIn) {
+                fetchOptions.headers = {
+                    ...fetchOptions.headers,
+                    'Authorization': 'Basic ' + btoa(auth.username + ':' + auth.password)
+                };
+            }
+            const response = await fetch(path, fetchOptions);
+            if (response.status === 401 && isLoggedIn) {
+                logout();
+                return null;
+            }
+            return response;
+        }
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const remember = document.getElementById('rememberMe').checked;
+            if (!username || !password) {
+                showToast('请输入用户名和密码', 'error');
+                return;
+            }
+            fetch('/api/login', {
+                headers: {
+                    'Authorization': 'Basic ' + btoa(username + ':' + password)
+                }
+            }).then(response => {
+                if (response.ok) {
+                    auth.username = username;
+                    auth.password = password;
+                    isLoggedIn = true;
+                    saveAuthToStorage(remember);
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.removeEventListener('keydown', handleLoginKeydown);
+                    updateTopActions();
+                    updateToolbar();
+                    loadFiles('');
+                    syncSharesFromBackend();
+                    showToast('登录成功', 'success');
+                } else {
+                    response.json().then(data => {
+                        const errorMsg = data && data.message ? data.message : '用户名或密码错误';
+                        const isLockout = data && data.error === 'too_many_attempts';
+                        showToast(errorMsg, 'error', isLockout ? 5000 : 3000);
+                    }).catch(() => {
+                        showToast('用户名或密码错误', 'error');
+                    });
+                }
+            }).catch(() => {
+                showToast('用户名或密码错误', 'error');
+            });
+        }
+        function logout() {
+            isLoggedIn = false;
+            sessionStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(STORAGE_KEY);
+            auth = { username: '', password: '' };
+            selectedItems.clear();
+            currentPath = '';
+            updateTopActions();
+            updateToolbar();
+            loadFiles('');
+            showToast('已退出登录');
+        }
+        function updateTopActions() {
+            const topActions = document.getElementById('topActions');
+            const searchBox = `
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="" onkeyup="handleSearchKey(event)">
+                    <button class="search-btn" title="搜索" onclick="toggleSearch()"><i class="fas fa-search"></i></button>
+                </div>
+            `;
+            if (!isLoggedIn) {
+                topActions.innerHTML = searchBox + `
+                    <button class="top-action-btn" title="登录" onclick="openLoginScreen()"><i class="fas fa-user"></i></button>
+                `;
+            } else {
+                topActions.innerHTML = searchBox + `
+                    <button class="top-action-btn" title="上传进度" onclick="toggleUploadProgress()"><i class="fas fa-exchange-alt" id="uploadToggleIcon" style="transform: rotate(90deg);"></i></button>
+                    <button class="top-action-btn" title="分享列表" onclick="showShares()"><i class="fas fa-link"></i></button>
+                    <button class="top-action-btn" title="操作历史" onclick="showHistory()"><i class="fas fa-history"></i></button>
+                    <button class="top-action-btn" title="设置" onclick="showSettings()"><i class="fas fa-cog"></i></button>
+                    <button class="top-action-btn" title="退出" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+                `;
+            }
+        }
+        function updateToolbar() {
+            const toolbar = document.querySelector('.toolbar');
+            if (!isLoggedIn) {
+                toolbar.innerHTML = ``;
+                toolbar.style.border = 'none';
+                toolbar.style.background = 'transparent';
+            } else {
+                toolbar.innerHTML = `                   
+                    <button class="toolbar-btn" title="上传文件" onclick="showFileUpload()"><i class="fas fa-file-upload"></i></button>
+                    <button class="toolbar-btn" title="新建目录" onclick="showMkdirModal()"><i class="fas fa-folder-plus"></i></button>
+                    <button class="toolbar-btn" title="删除选项" onclick="deleteSelected()"><i class="fas fa-trash"></i></button>
+                    <button class="toolbar-btn" title="加锁目录" onclick="lockSelectedDirectory()"><i class="fas fa-lock"></i></button>
+                    <button class="toolbar-btn" title="清理隐藏文件" onclick="cleanupHiddenFiles()"><i class="fas fa-broom"></i></button>
+                    <button class="toolbar-btn" title="刷新" onclick="handleRefresh()"><i class="fas fa-sync-alt"></i></button>
+                `;
+                toolbar.style.border = '';
+                toolbar.style.background = '';
+            }
+        }
+        const startTime = Date.now();
+        let pageLoaded = false;
+
+        function hideLoadingOverlay() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('hidden');
+            }
+        }
+
+        function showLoadingOverlay() {
+            if (pageLoaded) return;
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.classList.remove('hidden');
+            }
+        }
+
+        function onPageLoaded() {
+            pageLoaded = true;
+            hideLoadingOverlay();
+        }
+
+        const threshold = 1000;
+        setTimeout(() => {
+            const elapsed = Date.now() - startTime;
+            if (!pageLoaded && elapsed >= threshold) {
+                showLoadingOverlay();
+            }
+        }, threshold);
+
+        window.addEventListener('load', onPageLoaded);
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const serverRestarted = await loadPublicConfig();
+            if (serverRestarted) {
+                clearAuthStorage();
+            }
+            const wasLoggedIn = loadAuthFromStorage();
+            updateTopActions();
+            updateToolbar();
+            loadFiles('');
+            if (wasLoggedIn) {
+                syncSharesFromBackend();
+            }
+            scheduleHideLoading();
+        });
+
+        function closeLoginScreen() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.removeEventListener('keydown', handleLoginKeydown);
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('rememberMe').checked = false;
+            sessionStorage.removeItem(STORAGE_KEY);
+        }
+
+        function handleLoginKeydown(event) {
+            if (event.key === 'Enter') {
+                const loginScreen = document.getElementById('loginScreen');
+                if (loginScreen.style.display === 'flex') {
+                    login();
+                }
+            }
+        }
+
+        function openLoginScreen() {
+            loadAuthFromStorage();
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.addEventListener('keydown', handleLoginKeydown);
+        }
+
+        async function loadPublicConfig() {
+            try {
+                const response = await fetch('/api/public-config');
+                if (response.ok) {
+                    const data = await response.json();
+                    const storedServerStart = sessionStorage.getItem(SERVER_START_KEY);
+                    const serverRestarted = storedServerStart && storedServerStart !== String(data.server_start_time);
+                    if (serverRestarted) {
+                        sessionStorage.removeItem(STORAGE_KEY);
+                        localStorage.removeItem(STORAGE_KEY);
+                        localStorage.removeItem(REMEMBER_KEY);
+                        localStorage.removeItem(LAST_ACTIVE_KEY);
+                    }
+                    sessionStorage.setItem(SERVER_START_KEY, String(data.server_start_time));
+                    document.title = data.network_name || '文件管理器';
+                    const siteName = document.getElementById('siteName');
+                    if (siteName) {
+                        siteName.textContent = data.network_name || '文件管理';
+                    }
+                    const loginTitle = document.getElementById('loginTitle');
+                    if (loginTitle) {
+                        loginTitle.textContent = data.network_name || '文件管理器';
+                    }
+                    const copyrightFooter = document.getElementById('copyrightFooter');
+                    if (copyrightFooter && data.copyright_year && data.copyright_domain) {
+                        copyrightFooter.textContent = '© ' + data.copyright_year + ' ' + data.copyright_domain + '. All rights reserved.';
+                    } else if (copyrightFooter) {
+                        copyrightFooter.textContent = '';
+                    }
+                    const siteLogo = document.getElementById('siteLogo');
+                    const siteIcon = document.getElementById('siteIcon');
+                    const favicon = document.getElementById('favicon');
+                    if (data.network_logo) {
+                        const logoUrl = data.network_logo.startsWith('/') ? data.network_logo : '/' + data.network_logo.replace('./', '');
+                        siteLogo.src = logoUrl;
+                        siteLogo.style.display = 'block';
+                        siteIcon.style.display = 'none';
+                        favicon.href = logoUrl;
+                        favicon.type = 'image/png';
+                    } else {
+                        siteLogo.style.display = 'none';
+                        siteIcon.style.display = 'inline-block';
+                        favicon.href = '/static/img/default-favicon.ico';
+                        favicon.type = 'image/x-icon';
+                    }
+                    return serverRestarted;
+                }
+            } catch (e) {
+                console.error('加载公开配置失败', e);
+                if (window.location.protocol === 'https:') {
+                    const httpUrl = 'http://' + window.location.host + window.location.pathname;
+                    console.log('HTTPS连接失败，尝试跳转到HTTP:', httpUrl);
+                    window.location.href = httpUrl;
+                    return false;
+                }
+            }
+            return false;
+        }
+        async function loadFiles(path) {
+            isSearchMode = false;
+            currentPath = path;
+            const response = await api(`/api/files?path=${encodeURIComponent(path)}`);
+            if (!response) return;
+            const data = await response.json();
+            updateBreadcrumb(path);
+            allFiles = data.items || [];
+            if (!isLoggedIn) {
+                allFiles = allFiles.filter(item => !item.locked);
+            }
+            renderFiles(allFiles);
+            updateSortIcons();
+            document.getElementById('webdavUrl').textContent = `http://localhost:${data.port || 8081}/webdav/`;
+        }
+        function updateBreadcrumb(path) {
+            const parts = path.split('/').filter(p => p);
+            let html = '<a href="#" onclick="loadFiles(\'\');return false;">根目录</a>';
+            let cumPath = '';
+            for (const part of parts) {
+                cumPath += '/' + part;
+                html += ` > <a href="#" onclick="loadFiles('${cumPath}');return false;">${part}</a>`;
+            }
+            document.getElementById('breadcrumb').innerHTML = html;
+        }
+        function normalizePath(path) {
+            return path.replace(/\\/g, '/').replace(/^\//, '');
+        }
+        function sortBy(field) {
+            if (sortField === field) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortField = field;
+                sortDirection = 'asc';
+            }
+            updateSortIcons();
+            applySort();
+        }
+        function updateSortIcons() {
+            document.querySelectorAll('.sort-icon').forEach(icon => {
+                icon.classList.remove('active', 'asc', 'desc');
+            });
+            const activeIcon = document.getElementById('sort-' + sortField);
+            if (activeIcon) {
+                activeIcon.classList.add('active', sortDirection);
+            }
+        }
+        function applySort() {
+            const sortedItems = [...window.currentItems].sort((a, b) => {
+                let aVal, bVal;
+                if (sortField === 'name') {
+                    aVal = a.name.toLowerCase();
+                    bVal = b.name.toLowerCase();
+                } else if (sortField === 'size') {
+                    aVal = a.is_dir ? 0 : a.size;
+                    bVal = b.is_dir ? 0 : b.size;
+                } else if (sortField === 'modified') {
+                    aVal = a.modified ? new Date(a.modified).getTime() : 0;
+                    bVal = b.modified ? new Date(b.modified).getTime() : 0;
+                }
+                if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+                if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+            renderFiles(sortedItems);
+        }
+        function renderFiles(items) {
+            window.currentItems = items;
+            const tableBody = document.getElementById('fileTableBody');
+            if (items.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="empty-state"></td></tr>';
+                return;
+            }
+            tableBody.innerHTML = items.map(item => {
+                const normalizedPath = normalizePath(item.path);
+                const isSelected = selectedItems.has(item.path) ? 'selected' : '';
+                const modifiedTime = item.modified ? new Date(item.modified).toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                }) : '';
+                let displayName = '';
+                if (isSearchMode) {
+                    const dirPath = item.path.substring(0, item.path.length - item.name.length).replace(/\/$/, '');
+                    displayName = dirPath ? `${dirPath}/` : '';
+                }
+                return `
+                <tr class="${isSelected}" onclick="toggleSelect('${item.path}', event)">
+                    <td><input type="checkbox" class="file-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation();toggleSelect('${item.path}', event)"></td>
+                    <td class="file-name-cell" onclick="event.stopPropagation();${item.is_dir ? `loadFiles('${normalizedPath}')` : ''}">
+                        <span class="file-icon">${item.is_dir && item.locked ? `<i class="fas fa-folder"></i><i class="fas fa-lock file-lock-icon"></i>` : `<i class="fas ${item.is_dir ? 'fa-folder' : getFileIcon(item.name)}"></i>`}</span>
+                        <span class="file-name"><span class="file-path">${displayName}</span>${item.name}</span>
+                    </td>
+                    <td class="file-size" style="text-align:right">${item.is_dir ? '-' : formatSize(item.size)}</td>
+                    <td class="file-modified" style="text-align:right">${modifiedTime}</td>
+                    <td>
+                        <div class="file-actions">
+                            ${!item.is_dir ? `<button class="file-action-btn" title="下载" onclick="event.stopPropagation();downloadFile('${normalizedPath}')"><i class="fas fa-download"></i></button>` : ''}
+                            ${isLoggedIn && item.is_dir ? `<button class="file-action-btn" title="${item.locked ? '解锁' : '加锁'}" onclick="event.stopPropagation();toggleLock('${normalizedPath}', ${item.locked})"><i class="fas ${item.locked ? 'fa-unlock' : 'fa-lock'}"></i></button>` : ''}
+                            ${isLoggedIn && !item.is_dir ? `<button class="file-action-btn" title="分享" onclick="event.stopPropagation();copyShareLink('${normalizedPath}')"><i class="fas fa-link"></i></button>` : ''}
+                            ${isLoggedIn ? `
+                                <button class="file-action-btn" title="重命名" onclick="event.stopPropagation();showRenameModal('${normalizedPath}', '${item.name}')"><i class="fas fa-edit"></i></button>
+                                <button class="file-action-btn" title="删除" onclick="event.stopPropagation();deleteItem('${normalizedPath}')"><i class="fas fa-trash"></i></button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+        function toggleSelectAll() {
+            const checkbox = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.file-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+            });
+            window.currentItems.forEach(item => {
+                if (checkbox.checked) {
+                    selectedItems.add(item.path);
+                } else {
+                    selectedItems.delete(item.path);
+                }
+            });
+            renderFiles(window.currentItems || []);
+        }
+        function handleSearchKey(event) {
+            if (event.key === 'Enter') {
+                handleSearch();
+            }
+        }
+        function handleSearch() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            if (!keyword) {
+                renderFiles(allFiles);
+                updateSortIcons();
+                updateBreadcrumb(currentPath);
+                return;
+            }
+            isSearchMode = true;
+            api(`/api/search?keyword=${encodeURIComponent(keyword)}`).then(response => {
+                if (response && response.ok) {
+                    return response.json();
+                }
+                return { items: [] };
+            }).then(data => {
+                const items = data.items || [];
+                renderFiles(items);
+                updateSortIcons();
+                document.getElementById('breadcrumb').innerHTML = `<span style="color: var(--primary-color);">搜索关键词：${keyword}</span>，记录 <span style="color: var(--primary-color);">${items.length}</span> 条`;
+            }).catch(() => {
+                const filtered = allFiles.filter(item => item.name.toLowerCase().includes(keyword));
+                renderFiles(filtered);
+                updateSortIcons();
+                document.getElementById('breadcrumb').innerHTML = `<span style="color: var(--primary-color);">搜索关键词：${keyword}</span>，记录 <span style="color: var(--primary-color);">${filtered.length}</span> 条`;
+            });
+        }
+        function toggleSearch() {
+            const input = document.getElementById('searchInput');
+            const searchBtn = document.querySelector('.search-btn');
+            input.classList.toggle('expanded');
+            if (input.classList.contains('expanded')) {
+                input.focus();
+                searchBtn.style.borderRadius = '0 12px 12px 0';
+                searchBtn.style.borderLeft = 'none';
+            } else {
+                searchBtn.style.borderRadius = '12px';
+                searchBtn.style.borderLeft = '1px solid var(--glass-border)';
+            }
+        }
+        function handleRefresh() {
+            const input = document.getElementById('searchInput');
+            input.value = '';
+            input.classList.remove('expanded');
+            loadFiles(currentPath);
+            showToast('已刷新', 'success');
+        }
+        function getFileIcon(name) {
+            const ext = name.split('.').pop().toLowerCase();
+            const icons = { jpg: 'fa-image', jpeg: 'fa-image', png: 'fa-image', gif: 'fa-image', svg: 'fa-image', pdf: 'fa-file-pdf', doc: 'fa-file-word', docx: 'fa-file-word', txt: 'fa-file-text', xml: 'fa-file-text', md: 'fa-file-alt', zip: 'fa-file-archive', rar: 'fa-file-archive', '7z': 'fa-file-archive', tar: 'fa-file-archive', gz: 'fa-file-archive', mp3: 'fa-music', wav: 'fa-music', mp4: 'fa-film', avi: 'fa-film', mkv: 'fa-film', exe: 'fa-desktop', dll: 'fa-cog', py: 'fa-file-code', js: 'fa-file-code', html: 'fa-file-code', css: 'fa-file-code', bat:'fa-file-code', cmd:'fa-file-code', command:'fa-file-code', sh:'fa-file-code' };
+            return icons[ext] || 'fa-file';
+        }
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        function toggleSelect(path, event) {
+            event.stopPropagation();
+            if (selectedItems.has(path)) {
+                selectedItems.delete(path);
+            } else {
+                selectedItems.add(path);
+            }
+            renderFiles(window.currentItems || []);
+        }
+        function goBack() {
+            const parts = currentPath.split('/').filter(p => p);
+            parts.pop();
+            loadFiles(parts.join('/'));
+        }
+        async function copyShareLink(path) {
+            const token = generateShareToken(path);
+            const filename = path.split('/').pop();
+            const shareUrl = window.location.origin + '/api/share/' + token + '/' + encodeURIComponent(filename);
+            const shareInfo = {
+                token: token,
+                path: path,
+                createdAt: new Date().toLocaleString()
+            };
+            const existingIndex = shareLinks.findIndex(s => s.path === path);
+            if (existingIndex >= 0) {
+                shareLinks.splice(existingIndex, 1);
+            }
+            shareLinks.unshift(shareInfo);
+            localStorage.setItem('shareLinks', JSON.stringify(shareLinks));
+            api('/api/shares', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, path })
+            });
+            actionHistory.unshift({
+                action: '分享',
+                target: filename,
+                status: 'success',
+                time: new Date().toLocaleString('zh-CN')
+            });
+            if (actionHistory.length > 100) actionHistory.pop();
+            localStorage.setItem('actionHistory', JSON.stringify(actionHistory));
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+                showToast('分享链接已复制', 'success');
+            } catch (err) {
+                const textarea = document.createElement('textarea');
+                textarea.value = shareUrl;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('分享链接已复制', 'success');
+            }
+        }
+        async function copyShareLinkByIndex(index) {
+            const item = shareLinks[index];
+            if (!item) return;
+            const filename = item.path.split('/').pop();
+            const shareUrl = window.location.origin + '/api/share/' + item.token + '/' + encodeURIComponent(filename);
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+                showToast('分享链接已复制', 'success');
+            } catch (err) {
+                const textarea = document.createElement('textarea');
+                textarea.value = shareUrl;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('分享链接已复制', 'success');
+            }
+        }
+        function generateShareToken(path) {
+            const timestamp = Date.now().toString(36);
+            const randomStr = Math.random().toString(36).substring(2, 10);
+            const pathHash = btoa(encodeURIComponent(path)).substring(0, 8);
+            return timestamp + randomStr + pathHash;
+        }
+        async function downloadFile(path) {
+            const options = {};
+            if (isLoggedIn) {
+                options.headers = {
+                    'Authorization': 'Basic ' + btoa(auth.username + ':' + auth.password)
+                };
+            }
+            const response = await fetch(`/api/download?path=${encodeURIComponent(path)}`, options);
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = path.split('/').pop();
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }
+        }
+        function showFileUpload() {
+            if (!isLoggedIn) {
+                showToast('请先登录', 'error');
+                return;
+            }
+            document.getElementById('fileInput').click();
+        }
+        async function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+            
+            showUploadProgress();
+            
+            for (const file of files) {
+                const uploadId = addUploadItem(file);
+                await uploadFile(file, uploadId, '');
+            }
+            event.target.value = '';
+        }
+        function handleDragOver(event) {
+            event.preventDefault();
+            document.getElementById('uploadArea').classList.add('dragover');
+        }
+        function handleDragLeave(event) {
+            document.getElementById('uploadArea').classList.remove('dragover');
+        }
+        async function handleDrop(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById('uploadArea').classList.remove('dragover');
+            
+            const items = event.dataTransfer.items;
+            if (!items || items.length === 0) {
+                showToast('请选择文件或文件夹', 'error');
+                return;
+            }
+            
+            const allFiles = [];
+            const dirPaths = new Set();
+            
+            for (const item of items) {
+                const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+                if (entry) {
+                    await processEntry(entry, '', allFiles, dirPaths);
+                }
+            }
+            
+            if (allFiles.length === 0) {
+                showToast('请选择文件或文件夹', 'error');
+                return;
+            }
+            
+            for (const dirPath of dirPaths) {
+                const fullPath = currentPath ? currentPath + '/' + dirPath : dirPath;
+                await api('/api/mkdirs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: fullPath })
+                });
+            }
+            
+            showUploadProgress();
+            
+            for (const fileInfo of allFiles) {
+                const uploadId = addUploadItem(fileInfo.file);
+                await uploadFile(fileInfo.file, uploadId, fileInfo.relativePath);
+            }
+        }
+        
+        async function processEntry(entry, basePath, allFiles, dirPaths) {
+            if (entry.isFile) {
+                const file = await new Promise((resolve, reject) => {
+                    entry.file(resolve, reject);
+                });
+                allFiles.push({ file, relativePath: basePath });
+            } else if (entry.isDirectory) {
+                const newBasePath = basePath ? basePath + '/' + entry.name : entry.name;
+                dirPaths.add(newBasePath);
+                const reader = entry.createReader();
+                const entries = [];
+                let batch = [];
+                do {
+                    batch = await new Promise((resolve) => {
+                        reader.readEntries(resolve);
+                    });
+                    entries.push(...batch);
+                } while (batch.length > 0);
+                for (const subEntry of entries) {
+                    await processEntry(subEntry, newBasePath, allFiles, dirPaths);
+                }
+            }
+        }
+        function initUploadProgress() {
+            uploadsInProgress = {};
+            uploadCompleteCount = 0;
+            totalUploads = 0;
+            showUploadProgress();
+            document.getElementById('uploadProgressContent').innerHTML = '';
+        }
+        function addUploadItem(file) {
+            uploadIdCounter++;
+            const id = 'upload-' + uploadIdCounter + '-' + Date.now();
+            uploadsInProgress[id] = { name: file.name, size: file.size, progress: 0, status: 'waiting', xhr: null, filePath: '' };
+            const content = document.getElementById('uploadProgressContent');
+            const newItemHtml = `
+                <div class="upload-item" id="${id}">
+                    <div class="upload-item-header">
+                        <span class="upload-item-name">${file.name}</span>
+                        <span class="upload-item-size">${formatSize(file.size)}</span>
+                        <button class="upload-cancel-btn" id="cancel-${id}" style="display: none;" onclick="cancelUpload('${id}')">取消</button>
+                    </div>
+                    <div class="upload-progress-bar">
+                        <div class="upload-progress-fill" id="progress-${id}" style="width: 0%"></div>
+                    </div>
+                    <div class="upload-item-status" id="status-${id}">等待中...</div>
+                </div>
+            `;
+            content.innerHTML = newItemHtml + content.innerHTML;
+            uploadsInProgress[id].domId = id;
+            totalUploads++;
+            return id;
+        }
+        function updateUploadProgress(id, progress) {
+            uploadsInProgress[id].progress = progress;
+            document.getElementById(`progress-${id}`).style.width = progress + '%';
+        }
+        function startUpload(id) {
+            uploadsInProgress[id].status = 'uploading';
+            document.getElementById(`status-${id}`).textContent = '上传中...';
+            document.getElementById(`status-${id}`).style.color = '#667eea';
+            document.getElementById(`cancel-${id}`).style.display = 'block';
+        }
+        function completeUpload(id, success, isCancelled = false) {
+            uploadCompleteCount++;
+            uploadsInProgress[id].status = isCancelled ? 'cancelled' : (success ? 'completed' : 'failed');
+            document.getElementById(`status-${id}`).textContent = isCancelled ? '✗ 已取消' : (success ? '✓ 完成' : '✗ 失败');
+            document.getElementById(`status-${id}`).style.color = isCancelled ? '#6b7280' : (success ? '#28a745' : '#dc3545');
+            document.getElementById(`cancel-${id}`).style.display = 'none';
+            if (success) {
+                document.getElementById(`progress-${id}`).style.width = '100%';
+                const item = uploadsInProgress[id];
+                actionHistory.unshift({
+                    action: '上传',
+                    target: item.name,
+                    status: 'success',
+                    time: new Date().toLocaleString('zh-CN')
+                });
+                if (actionHistory.length > 100) actionHistory.pop();
+                localStorage.setItem('actionHistory', JSON.stringify(actionHistory));
+            } else if (!isCancelled) {
+                const item = uploadsInProgress[id];
+                actionHistory.unshift({
+                    action: '上传',
+                    target: item.name,
+                    status: 'fail',
+                    time: new Date().toLocaleString('zh-CN')
+                });
+                if (actionHistory.length > 100) actionHistory.pop();
+                localStorage.setItem('actionHistory', JSON.stringify(actionHistory));
+            } else {
+                const item = uploadsInProgress[id];
+                actionHistory.unshift({
+                    action: '上传',
+                    target: item.name,
+                    status: 'cancelled',
+                    time: new Date().toLocaleString('zh-CN')
+                });
+                if (actionHistory.length > 100) actionHistory.pop();
+                localStorage.setItem('actionHistory', JSON.stringify(actionHistory));
+            }
+            const waitingCount = Object.values(uploadsInProgress).filter(u => u.status === 'waiting').length;
+            if (uploadCompleteCount >= totalUploads && waitingCount === 0) {
+                setTimeout(() => {
+                    const successCount = Object.values(uploadsInProgress).filter(u => u.status === 'completed').length;
+                    const failCount = Object.values(uploadsInProgress).filter(u => u.status === 'failed').length;
+                    const cancelledCount = Object.values(uploadsInProgress).filter(u => u.status === 'cancelled').length;
+                    if (successCount > 0) {
+                        showToast(`上传完成: ${successCount}个成功${failCount > 0 ? `, ${failCount}个失败` : ''}${cancelledCount > 0 ? `, ${cancelledCount}个已取消` : ''}`, 'success');
+                    } else if (failCount > 0 && cancelledCount === 0) {
+                        showToast(`上传失败: ${failCount}个文件`, 'error');
+                    }
+                    loadFiles(currentPath);
+                    if (hideTimeout) {
+                        clearTimeout(hideTimeout);
+                        hideTimeout = null;
+                    }
+                    if (!Object.values(uploadsInProgress).some(u => u.status === 'uploading')) {
+                        hideTimeout = setTimeout(() => {
+                            hideTimeout = null;
+                            hideUploadProgress();
+                        }, 3000);
+                    }
+                }, 500);
+            }
+        }
+        function cancelUpload(id) {
+            const item = uploadsInProgress[id];
+            if (!item || item.status !== 'uploading') return;
+            
+            if (item.xhr) {
+                item.xhr.abort();
+            }
+            
+            document.getElementById(`cancel-${id}`).style.display = 'none';
+            
+            if (item.filePath) {
+                fetch(`/api/delete?path=${encodeURIComponent(item.filePath)}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Basic ' + btoa(auth.username + ':' + auth.password) }
+                }).catch(() => {});
+            }
+            
+            completeUpload(id, false, true);
+        }
+        function hideUploadProgress() {
+            document.getElementById('uploadProgress').classList.remove('active');
+        }
+        function showUploadProgress() {
+            document.getElementById('uploadProgress').classList.add('active');
+        }
+        function toggleUploadProgress() {
+            const uploadProgress = document.getElementById('uploadProgress');
+            if (uploadProgress.classList.contains('active')) {
+                hideUploadProgress();
+            } else {
+                showUploadProgress();
+            }
+        }
+        async function uploadFile(file, uploadId, relativePath = '') {
+            if (!isLoggedIn) {
+                showToast('请先登录', 'error');
+                completeUpload(uploadId, false);
+                return;
+            }
+            if (!auth.username || !auth.password) {
+                showToast('请先登录', 'error');
+                completeUpload(uploadId, false);
+                return;
+            }
+            const item = uploadsInProgress[uploadId];
+            if (!item || item.status !== 'waiting') return;
+            const id = uploadId;
+            startUpload(id);
+            const formData = new FormData();
+            formData.append('file', file);
+            let uploadPath = currentPath;
+            if (relativePath) {
+                const lastSlash = relativePath.lastIndexOf('/');
+                uploadPath = lastSlash > 0 
+                    ? (currentPath ? currentPath + '/' + relativePath.substring(0, lastSlash) : relativePath.substring(0, lastSlash))
+                    : currentPath;
+            }
+            formData.append('path', uploadPath);
+            
+            const filePath = uploadPath ? uploadPath + '/' + file.name : '/' + file.name;
+            uploadsInProgress[id].filePath = filePath;
+            
+            return new Promise((resolve) => {
+                const xhr = new XMLHttpRequest();
+                uploadsInProgress[id].xhr = xhr;
+                
+                xhr.open('POST', '/api/upload');
+                xhr.setRequestHeader('Authorization', 'Basic ' + btoa(auth.username + ':' + auth.password));
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const progress = Math.round((e.loaded / e.total) * 100);
+                        updateUploadProgress(id, progress);
+                    }
+                });
+                xhr.addEventListener('load', () => {
+                    if (uploadsInProgress[id] && uploadsInProgress[id].status !== 'uploading') {
+                        resolve();
+                        return;
+                    }
+                    if (xhr.status === 200) {
+                        completeUpload(id, true);
+                    } else if (xhr.status === 401) {
+                        logout();
+                        showToast('请先登录', 'error');
+                        completeUpload(id, false);
+                    } else {
+                        completeUpload(id, false);
+                    }
+                    resolve();
+                });
+                xhr.addEventListener('error', () => {
+                    if (uploadsInProgress[id] && uploadsInProgress[id].status !== 'uploading') {
+                        resolve();
+                        return;
+                    }
+                    completeUpload(id, false);
+                    resolve();
+                });
+                xhr.addEventListener('abort', () => {
+                    resolve();
+                });
+                xhr.send(formData);
+            });
+        }
+        function showMkdirModal() {
+            if (!isLoggedIn) {
+                showToast('请先登录', 'error');
+                return;
+            }
+            document.getElementById('dirnameInput').value = '';
+            document.getElementById('mkdirModal').classList.add('active');
+        }
+        async function createDir() {
+            if (!isLoggedIn) {
+                showToast('请先登录', 'error');
+                return;
+            }
+            const name = document.getElementById('dirnameInput').value;
+            if (!name) return;
+            const response = await api('/api/mkdir', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: currentPath, name })
+            });
+            if (response && response.ok) {
+                actionHistory.unshift({
+                    action: '创建文件夹',
+                    target: name,
+                    status: 'success',
+                    time: new Date().toLocaleString('zh-CN')
+                });
+                if (actionHistory.length > 100) actionHistory.pop();
+                localStorage.setItem('actionHistory', JSON.stringify(actionHistory));
+                showToast('文件夹创建成功', 'success');
+                closeModal('mkdirModal');
+                loadFiles(currentPath);
+            }
+        }
+        function showRenameModal(path, oldName) {
+            if (!isLoggedIn) {
+                showToast('请先登录', 'error');
+                return;
+            }
+            renameTarget = path;
+            document.getElementById('renameInput').value = oldName;
+            document.getElementById('renameModal').classList.add('active');
+        }
+        async function doRename() {
+            if (!isLoggedIn) {
+                showToast('请先登录', 'error');
+                return;
+            }
+            const newName = document.getElementById('renameInput').value;
+            if (!newName || !renameTarget) return;
+            const response = await api('/api/rename', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: renameTarget, new_name: newName })
+            });
+            if (response && response.ok) {
+                actionHistory.unshift({
+                    action: '重命名',
+                    target: renameTarget.split('/').pop() + ' → ' + newName,
+                    status: 'success',
+                    time: new Date().toLocaleString('zh-CN')
+                });
+                if (actionHistory.length > 100) actionHistory.pop();
+                localStorage.setItem('actionHistory', JSON.stringify(actionHistory));
+                showToast('重命名成功', 'success');
+                closeModal('renameModal');
+                loadFiles(currentPath);
+            }
+        }
+        function deleteItem(path) {
+            if (!isLoggedIn) {
+                showToast('请先登录', 'error');
+                return;
+            }
+            pendingDeleteItems = [path];
+            document.getElementById('deleteConfirmText').textContent = '确定要删除吗？';
+            document.getElementById('deleteConfirmModal').classList.add('active');
+        }
+        function deleteSelected() {
+            if (!isLoggedIn) {
+                showToast('请先登录', 'error');
+                return;
+            }
+            if (selectedItems.size === 0) {
+                showToast('请先选择要删除的文件或目录', 'error');
+                return;
+            }
+            pendingDeleteItems = Array.from(selectedItems);
+            document.getElementById('deleteConfirmText').textContent = `确定要删除 ${selectedItems.size} 个项目吗？`;
+            document.getElementById('deleteConfirmModal').classList.add('active');
+        }
+        async function confirmDelete() {
+            for (const path of pendingDeleteItems) {
+                const response = await api(`/api/delete?path=${encodeURIComponent(path)}`, { method: 'DELETE' });
+                actionHistory.unshift({
+                    action: '删除',
+                    target: path.split('/').pop(),
+                    status: response && response.ok ? 'success' : 'fail',
+                    time: new Date().toLocaleString('zh-CN')
+                });
+                if (actionHistory.length > 100) actionHistory.pop();
+                localStorage.setItem('actionHistory', JSON.stringify(actionHistory));
+                const shareIndex = shareLinks.findIndex(s => s.path === path);
+                if (shareIndex >= 0) {
+                    const token = shareLinks[shareIndex].token;
+                    shareLinks.splice(shareIndex, 1);
+                    localStorage.setItem('shareLinks', JSON.stringify(shareLinks));
+                    api('/api/shares', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ tokens: [token] })
+                    });
+                }
+            }
+            selectedItems.clear();
+            pendingDeleteItems = [];
+            closeModal('deleteConfirmModal');
+            showToast('删除成功', 'success');
+            loadFiles(currentPath);
+            if (document.getElementById('shareModal').classList.contains('active')) {
+                showShares();
+            }
+        }
+        function cleanupHiddenFiles() {
+            if (!isLoggedIn) {
+                showToast('请先登录', 'error');
+                return;
+            }
+            document.getElementById('cleanupHiddenModal').classList.add('active');
+        }
+        async function confirmCleanupHidden() {
+            closeModal('cleanupHiddenModal');
+            const response = await api('/api/cleanup-hidden', { method: 'POST' });
+            if (response && response.ok) {
+                const data = await response.json();
+                if (data && data.success) {
+                    actionHistory.unshift({
+                        action: '清理隐藏文件',
+                        target: data.deleted_count + '个文件',
+                        status: 'success',
+                        time: new Date().toLocaleString('zh-CN')
+                    });
+                    if (actionHistory.length > 100) actionHistory.pop();
+                    localStorage.setItem('actionHistory', JSON.stringify(actionHistory));
+                    showToast(`已清理 ${data.deleted_count} 个隐藏文件`, 'success');
+                    loadFiles(currentPath);
+                }
+            } else {
+                showToast('清理失败', 'error');
+            }
+        }
+        function lockSelectedDirectory() {
+            if (!isLoggedIn) {
+                showToast('请先登录', 'error');
+                return;
+            }
+            if (selectedItems.size === 0) {
+                showToast('请先选择要加锁的目录', 'error');
+                return;
+            }
+            const selectedDirs = [];
+            for (const path of selectedItems) {
+                const item = allFiles.find(f => f.path === path);
+                if (item && item.is_dir) {
+                    selectedDirs.push({ path, locked: item.locked });
+                }
+            }
+            if (selectedDirs.length === 0) {
+                showToast('请先选择要加锁的目录', 'error');
+                return;
+            }
+            const hasUnlocked = selectedDirs.some(dir => !dir.locked);
+            const action = hasUnlocked ? '加锁' : '解锁';
+            const apiAction = hasUnlocked ? '/api/lock' : '/api/unlock';
+            (async () => {
+                for (const dir of selectedDirs) {
+                    const response = await api(apiAction, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ path: dir.path })
+                    });
+                    if (response && response.ok) {
+                        actionHistory.unshift({
+                            action: action,
+                            target: dir.path.split('/').pop(),
+                            status: 'success',
+                            time: new Date().toLocaleString('zh-CN')
+                        });
+                        if (actionHistory.length > 100) actionHistory.pop();
+                    }
+                }
+                localStorage.setItem('actionHistory', JSON.stringify(actionHistory));
+                showToast(`已对 ${selectedDirs.length} 个目录进行${action}`, 'success');
+                loadFiles(currentPath);
+            })();
+        }
+        function toggleLock(path, isLocked) {
+            if (!isLoggedIn) {
+                showToast('请先登录', 'error');
+                return;
+            }
+            if (isLocked) {
+                api('/api/unlock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: path })
+                }).then(response => {
+                    if (response && response.ok) {
+                        actionHistory.unshift({
+                            action: '解锁',
+                            target: path.split('/').pop(),
+                            status: 'success',
+                            time: new Date().toLocaleString('zh-CN')
+                        });
+                        if (actionHistory.length > 100) actionHistory.pop();
+                        localStorage.setItem('actionHistory', JSON.stringify(actionHistory));
+                        showToast('目录已解锁', 'success');
+                        loadFiles(currentPath);
+                    }
+                });
+            } else {
+                api('/api/lock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: path })
+                }).then(response => {
+                    if (response && response.ok) {
+                        actionHistory.unshift({
+                            action: '加锁',
+                            target: path.split('/').pop(),
+                            status: 'success',
+                            time: new Date().toLocaleString('zh-CN')
+                        });
+                        if (actionHistory.length > 100) actionHistory.pop();
+                        localStorage.setItem('actionHistory', JSON.stringify(actionHistory));
+                        showToast('目录已加锁', 'success');
+                        loadFiles(currentPath);
+                    }
+                });
+            }
+        }
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        function showHistory() {
+            const content = document.getElementById('historyContent');
+            if (actionHistory.length === 0) {
+                content.innerHTML = `
+                    <div class="history-empty">
+                        <i class="fas fa-history"></i>
+                        <p>暂无操作记录</p>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = actionHistory.map(item => `
+                    <div class="history-item">
+                        <span class="history-item-status">
+                            ${item.status === 'success' ? '<i class="fas fa-check-circle history-status-success"></i>' : '<i class="fas fa-times-circle history-status-fail"></i>'}
+                        </span>
+                        <span class="history-item-action">${item.action}</span>
+                        <span class="history-item-target" title="${item.target}">${item.target}</span>
+                        <span class="history-item-time">${item.time}</span>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('historyModal').classList.add('active');
+        }
+        function clearHistory() {
+            actionHistory = [];
+            localStorage.setItem('actionHistory', '[]');
+            closeModal('historyModal');
+            showToast('历史记录已清空', 'success');
+        }
+        async function showShares() {
+            if (isLoggedIn) {
+                await syncSharesFromBackend();
+            }
+            const content = document.getElementById('shareContent');
+            if (shareLinks.length === 0) {
+                content.innerHTML = `
+                    <div class="history-empty">
+                        <i class="fas fa-link"></i>
+                        <p>暂无分享链接</p>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div class="share-header">
+                        <div class="share-header-checkbox">
+                            <input type="checkbox" id="selectAllShares" onclick="toggleSelectAllShares()" />
+                        </div>
+                        <div class="share-header-path">文件路径</div>
+                        <div class="share-header-time">分享时间</div>
+                    </div>
+                ` + shareLinks.map((item, index) => `
+                    <div class="share-item">
+                        <div class="share-checkbox-wrapper">
+                            <input type="checkbox" class="share-checkbox" data-index="${index}" />
+                        </div>
+                        <div class="share-item-content">
+                            <span class="share-item-path" title="${item.path}（双击复制分享链接）" ondblclick="copyShareLinkByIndex(${index})">${item.path}${item.is_dir ? '/' : ''}</span>
+                            <span class="share-item-time">${item.createdAt}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('shareModal').classList.add('active');
+        }
+        function toggleSelectAllShares() {
+            const selectAll = document.getElementById('selectAllShares');
+            const checkboxes = document.querySelectorAll('.share-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = selectAll.checked;
+            });
+        }
+        async function deleteSelectedShares() {
+            const checkboxes = document.querySelectorAll('.share-checkbox:checked');
+            if (checkboxes.length === 0) {
+                showToast('请选择要删除的分享链接', 'error');
+                return;
+            }
+            const indicesToDelete = Array.from(checkboxes).map(cb => parseInt(cb.dataset.index)).sort((a, b) => b - a);
+            const tokensToDelete = indicesToDelete.map(index => shareLinks[index].token);
+            const deletedCount = indicesToDelete.length;
+            for (const index of indicesToDelete) {
+                shareLinks.splice(index, 1);
+            }
+            localStorage.setItem('shareLinks', JSON.stringify(shareLinks));
+            const response = await api('/api/shares', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tokens: tokensToDelete })
+            });
+            if (response && response.ok) {
+                actionHistory.unshift({
+                    action: '删除分享',
+                    target: deletedCount + '个分享链接',
+                    status: 'success',
+                    time: new Date().toLocaleString('zh-CN')
+                });
+                if (actionHistory.length > 100) actionHistory.pop();
+                localStorage.setItem('actionHistory', JSON.stringify(actionHistory));
+                await syncSharesFromBackend();
+                showShares();
+                showToast('已删除 ' + deletedCount + ' 个分享链接', 'success');
+            } else {
+                showToast('删除失败', 'error');
+            }
+        }
+        let originalHttpsEnabled = false;
+        let settingsListenersInitialized = false;
+        
+        async function showSettings() {
+            const response = await api('/api/config');
+            if (response) {
+                const data = await response.json();
+                document.getElementById('settingNetworkName').value = data.network_name;
+                document.getElementById('settingNetworkLogo').value = data.network_logo;
+                document.getElementById('settingCopyrightYear').value = data.copyright_year || '';
+                document.getElementById('settingCopyrightDomain').value = data.copyright_domain || '';
+                document.getElementById('settingPort').value = data.port;
+                document.getElementById('settingHttpsPort').value = data.https_port || '';
+                document.getElementById('settingWebdavHttpsPort').value = data.webdav_https_port;
+                document.getElementById('settingSslCrt').value = data.ssl_crt;
+                document.getElementById('settingSslKey').value = data.ssl_key;
+                document.getElementById('settingWebdavPort').value = data.webdav_port;
+                document.getElementById('settingUsername').value = data.username;
+                
+                document.getElementById('settingSambaPort').value = data.samba_port || '';
+                document.getElementById('settingFtpPort').value = data.ftp_port || '';
+                document.getElementById('settingFtpPassiveMin').value = data.ftp_passive_min || '';
+                document.getElementById('settingFtpPassiveMax').value = data.ftp_passive_max || '';
+                
+                const httpsEnabled = !!(data.https_enabled);
+                document.getElementById('settingEnableHttps').checked = httpsEnabled;
+                originalHttpsEnabled = httpsEnabled;
+
+                const webdavEnabled = !!(data.webdav_enabled);
+                document.getElementById('settingEnableWebdav').checked = webdavEnabled;
+
+                const webdavHttpsEnabled = !!(data.webdav_https_enabled);
+                document.getElementById('settingEnableWebdavHttps').checked = webdavHttpsEnabled;
+
+                const sambaEnabled = !!(data.samba_enabled);
+                document.getElementById('settingEnableSamba').checked = sambaEnabled;
+
+                const ftpEnabled = !!(data.ftp_enabled);
+                document.getElementById('settingEnableFtp').checked = ftpEnabled;
+
+                toggleHttpsPortInput();
+                toggleWebdavPortInput();
+                toggleWebdavHttpsPortInput();
+                toggleSambaPortInput();
+                toggleFtpPortInput();
+
+                if (!settingsListenersInitialized) {
+                    document.getElementById('settingEnableHttps').addEventListener('change', toggleHttpsPortInput);
+                    document.getElementById('settingEnableWebdav').addEventListener('change', toggleWebdavPortInput);
+                    document.getElementById('settingEnableWebdavHttps').addEventListener('change', toggleWebdavHttpsPortInput);
+                    document.getElementById('settingEnableSamba').addEventListener('change', toggleSambaPortInput);
+                    document.getElementById('settingEnableFtp').addEventListener('change', toggleFtpPortInput);
+                    settingsListenersInitialized = true;
+                }
+
+                document.getElementById('settingsModal').classList.add('active');
+                updateWebdavPreview();
+                updateWebdavHttpsPreview();
+            }
+        }
+        function toggleHttpsPortInput() {
+            const httpsEnabled = document.getElementById('settingEnableHttps').checked;
+            const httpsPortInput = document.getElementById('settingHttpsPort');
+            if (httpsEnabled) {
+                httpsPortInput.disabled = false;
+            } else {
+                httpsPortInput.value = '';
+                httpsPortInput.disabled = true;
+            }
+        }
+        function toggleWebdavPortInput() {
+            const webdavEnabled = document.getElementById('settingEnableWebdav').checked;
+            const webdavPortInput = document.getElementById('settingWebdavPort');
+            if (webdavEnabled) {
+                webdavPortInput.disabled = false;
+            } else {
+                webdavPortInput.value = '';
+                webdavPortInput.disabled = true;
+            }
+            updateWebdavPreview();
+        }
+        function toggleWebdavHttpsPortInput() {
+            const webdavHttpsEnabled = document.getElementById('settingEnableWebdavHttps').checked;
+            const webdavHttpsPortInput = document.getElementById('settingWebdavHttpsPort');
+            if (webdavHttpsEnabled) {
+                webdavHttpsPortInput.disabled = false;
+            } else {
+                webdavHttpsPortInput.value = '';
+                webdavHttpsPortInput.disabled = true;
+            }
+            updateWebdavHttpsPreview();
+        }
+        function toggleSambaPortInput() {
+            const sambaEnabled = document.getElementById('settingEnableSamba').checked;
+            const sambaPortInput = document.getElementById('settingSambaPort');
+            if (sambaEnabled) {
+                sambaPortInput.disabled = false;
+            } else {
+                sambaPortInput.value = '';
+                sambaPortInput.disabled = true;
+            }
+        }
+        function toggleFtpPortInput() {
+            const ftpEnabled = document.getElementById('settingEnableFtp').checked;
+            const ftpPortInput = document.getElementById('settingFtpPort');
+            const ftpPassiveMinInput = document.getElementById('settingFtpPassiveMin');
+            const ftpPassiveMaxInput = document.getElementById('settingFtpPassiveMax');
+            if (ftpEnabled) {
+                ftpPortInput.disabled = false;
+                ftpPassiveMinInput.disabled = false;
+                ftpPassiveMaxInput.disabled = false;
+            } else {
+                ftpPortInput.value = '';
+                ftpPassiveMinInput.value = '';
+                ftpPassiveMaxInput.value = '';
+                ftpPortInput.disabled = true;
+                ftpPassiveMinInput.disabled = true;
+                ftpPassiveMaxInput.disabled = true;
+            }
+        }
+        function updateWebdavPreview() {
+            const host = window.location.hostname;
+            const port = document.getElementById('settingWebdavPort').value || '端口号';
+            document.getElementById('previewHost').textContent = host;
+            document.getElementById('previewWebdavPort').textContent = port;
+        }
+        function updateWebdavHttpsPreview() {
+            const host = window.location.hostname;
+            const port = document.getElementById('settingWebdavHttpsPort').value || '端口号';
+            document.getElementById('previewHttpsHost').textContent = host;
+            document.getElementById('previewWebdavHttpsPort').textContent = port;
+        }
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelector(`button[onclick="switchTab('${tabId}')"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+        function validatePort(port, portName) {
+            const portNum = parseInt(port);
+            if (isNaN(portNum)) {
+                return { valid: false, message: `${portName}必须是数字` };
+            }
+            if (portNum < 1 || portNum > 65535) {
+                return { valid: false, message: `${portName}必须在1-65535之间` };
+            }
+            return { valid: true, message: '' };
+        }
+
+        async function checkPortAvailable(port, portName) {
+            const response = await fetch(`/api/check-port?port=${port}`);
+            if (response.ok) {
+                const result = await response.json();
+                if (!result.available) {
+                    return { available: false, message: result.message || `${portName}已被占用` };
+                }
+                return { available: true, message: '' };
+            }
+            return { available: true, message: '' };
+        }
+
+        async function saveSettings() {
+            const httpPortValue = document.getElementById('settingPort').value;
+            const httpsEnabledCheckbox = document.getElementById('settingEnableHttps');
+            const httpsEnabled = httpsEnabledCheckbox.checked;
+            const httpsPortValue = document.getElementById('settingHttpsPort').value;
+            const sslCrtValue = document.getElementById('settingSslCrt').value;
+            const sslKeyValue = document.getElementById('settingSslKey').value;
+            const webdavEnabled = document.getElementById('settingEnableWebdav').checked;
+            const webdavPortValue = document.getElementById('settingWebdavPort').value;
+            const webdavHttpsEnabled = document.getElementById('settingEnableWebdavHttps').checked;
+            const webdavHttpsPortValue = document.getElementById('settingWebdavHttpsPort').value;
+            
+            const httpPortValid = validatePort(httpPortValue, 'HTTP端口');
+            if (!httpPortValid.valid) {
+                showToast(httpPortValid.message, 'error');
+                return;
+            }
+            
+            const httpPortAvailable = await checkPortAvailable(httpPortValue, 'HTTP端口');
+            if (!httpPortAvailable.available) {
+                showToast(httpPortAvailable.message, 'error');
+                return;
+            }
+            
+            if (httpsEnabled) {
+                const httpsPortValid = validatePort(httpsPortValue, 'HTTPS端口');
+                if (!httpsPortValid.valid) {
+                    showToast(httpsPortValid.message, 'error');
+                    return;
+                }
+                
+                const httpsPortAvailable = await checkPortAvailable(httpsPortValue, 'HTTPS端口');
+                if (!httpsPortAvailable.available) {
+                    showToast(httpsPortAvailable.message, 'error');
+                    return;
+                }
+                
+                if (!sslCrtValue) {
+                    showToast('启用HTTPS需要填写SSL证书路径', 'error');
+                    return;
+                }
+                if (!sslKeyValue) {
+                    showToast('启用HTTPS需要填写SSL密钥路径', 'error');
+                    return;
+                }
+            }
+            
+            if (webdavEnabled) {
+                const webdavPortValid = validatePort(webdavPortValue, 'WebDAV端口');
+                if (!webdavPortValid.valid) {
+                    showToast(webdavPortValid.message, 'error');
+                    return;
+                }
+                
+                const webdavPortAvailable = await checkPortAvailable(webdavPortValue, 'WebDAV端口');
+                if (!webdavPortAvailable.available) {
+                    showToast(webdavPortAvailable.message, 'error');
+                    return;
+                }
+            }
+            
+            if (webdavHttpsEnabled) {
+                const webdavHttpsPortValid = validatePort(webdavHttpsPortValue, 'WebDAV HTTPS端口');
+                if (!webdavHttpsPortValid.valid) {
+                    showToast(webdavHttpsPortValid.message, 'error');
+                    return;
+                }
+                
+                const webdavHttpsPortAvailable = await checkPortAvailable(webdavHttpsPortValue, 'WebDAV HTTPS端口');
+                if (!webdavHttpsPortAvailable.available) {
+                    showToast(webdavHttpsPortAvailable.message, 'error');
+                    return;
+                }
+                
+                if (!sslCrtValue || !sslKeyValue) {
+                    showToast('启用HTTPS WebDAV需要SSL证书', 'error');
+                    return;
+                }
+            }
+            
+            const sambaEnabled = document.getElementById('settingEnableSamba').checked;
+            const sambaPortValue = document.getElementById('settingSambaPort').value;
+            if (sambaEnabled) {
+                if (!sambaPortValue) {
+                    showToast('启用Samba需要填写Samba端口', 'error');
+                    return;
+                }
+                
+                const sambaPortValid = validatePort(sambaPortValue, 'Samba端口');
+                if (!sambaPortValid.valid) {
+                    showToast(sambaPortValid.message, 'error');
+                    return;
+                }
+                
+                const sambaPortAvailable = await checkPortAvailable(sambaPortValue, 'Samba端口');
+                if (!sambaPortAvailable.available) {
+                    showToast(sambaPortAvailable.message, 'error');
+                    return;
+                }
+            }
+            
+            const ftpEnabled = document.getElementById('settingEnableFtp').checked;
+            const ftpPortValue = document.getElementById('settingFtpPort').value;
+            const ftpPassiveMinValue = document.getElementById('settingFtpPassiveMin').value;
+            const ftpPassiveMaxValue = document.getElementById('settingFtpPassiveMax').value;
+            if (ftpEnabled) {
+                if (!ftpPortValue) {
+                    showToast('启用FTP需要填写FTP端口', 'error');
+                    return;
+                }
+                
+                const ftpPortValid = validatePort(ftpPortValue, 'FTP端口');
+                if (!ftpPortValid.valid) {
+                    showToast(ftpPortValid.message, 'error');
+                    return;
+                }
+                
+                const ftpPortAvailable = await checkPortAvailable(ftpPortValue, 'FTP端口');
+                if (!ftpPortAvailable.available) {
+                    showToast(ftpPortAvailable.message, 'error');
+                    return;
+                }
+                
+                if (!ftpPassiveMinValue) {
+                    showToast('启用FTP需要填写被动端口最小值', 'error');
+                    return;
+                }
+                
+                const ftpPassiveMinValid = validatePort(ftpPassiveMinValue, 'FTP被动端口最小值');
+                if (!ftpPassiveMinValid.valid) {
+                    showToast(ftpPassiveMinValid.message, 'error');
+                    return;
+                }
+                
+                if (!ftpPassiveMaxValue) {
+                    showToast('启用FTP需要填写被动端口最大值', 'error');
+                    return;
+                }
+                
+                const ftpPassiveMaxValid = validatePort(ftpPassiveMaxValue, 'FTP被动端口最大值');
+                if (!ftpPassiveMaxValid.valid) {
+                    showToast(ftpPassiveMaxValid.message, 'error');
+                    return;
+                }
+                
+                if (parseInt(ftpPassiveMinValue) > parseInt(ftpPassiveMaxValue)) {
+                    showToast('FTP被动端口最小值不能大于最大值', 'error');
+                    return;
+                }
+            }
+            
+            const data = {
+                network_name: document.getElementById('settingNetworkName').value,
+                network_logo: document.getElementById('settingNetworkLogo').value,
+                copyright_year: document.getElementById('settingCopyrightYear').value,
+                copyright_domain: document.getElementById('settingCopyrightDomain').value,
+                port: parseInt(document.getElementById('settingPort').value),
+                https_port: httpsPortValue ? parseInt(httpsPortValue) : null,
+                ssl_crt: sslCrtValue,
+                ssl_key: sslKeyValue,
+                https_enabled: httpsEnabled,
+                webdav_enabled: document.getElementById('settingEnableWebdav').checked,
+                webdav_port: parseInt(document.getElementById('settingWebdavPort').value),
+                webdav_https_enabled: document.getElementById('settingEnableWebdavHttps').checked,
+                webdav_https_port: document.getElementById('settingWebdavHttpsPort').value ? parseInt(document.getElementById('settingWebdavHttpsPort').value) : null,
+                samba_enabled: document.getElementById('settingEnableSamba').checked,
+                samba_port: parseInt(document.getElementById('settingSambaPort').value),
+                ftp_enabled: document.getElementById('settingEnableFtp').checked,
+                ftp_port: parseInt(document.getElementById('settingFtpPort').value),
+                ftp_passive_min: parseInt(document.getElementById('settingFtpPassiveMin').value),
+                ftp_passive_max: parseInt(document.getElementById('settingFtpPassiveMax').value)
+            };
+            const username = document.getElementById('settingUsername').value;
+            if (username) data.username = username;
+            const password = document.getElementById('settingPassword').value;
+            if (password) data.password = password;
+            const response = await api('/api/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (response && response.ok) {
+                const result = await response.json();
+                auth.username = data.username;
+                if (password) auth.password = password;
+                closeModal('settingsModal');
+                if (result.needs_restart) {
+                    showToast('设置已保存，应用正在重启...', 'success');
+                    try {
+                        await api('/api/restart', { method: 'POST' });
+                    } catch (e) {
+                        console.log('Restart API called');
+                    }
+                    const targetHttps = result.https_will_be_enabled && result.https_port;
+                    const targetHttpPort = data.port;
+                    const targetHttpsPort = result.https_port;
+                    const redirectUrl = targetHttps 
+                        ? `https://${window.location.hostname}:${targetHttpsPort}${window.location.pathname}`
+                        : `http://${window.location.hostname}:${targetHttpPort}${window.location.pathname}`;
+                    
+                    if (targetHttps) {
+                        setTimeout(() => {
+                            const controller = new AbortController();
+                            const timeoutId = setTimeout(() => controller.abort(), 3000);
+                            fetch(`https://${window.location.hostname}:${targetHttpsPort}/api/status`, {
+                                method: 'GET',
+                                signal: controller.signal,
+                                mode: 'no-cors'
+                            }).then(() => {
+                                clearTimeout(timeoutId);
+                                window.location.href = redirectUrl;
+                            }).catch(() => {
+                                clearTimeout(timeoutId);
+                                window.location.href = `http://${window.location.hostname}:${targetHttpPort}${window.location.pathname}`;
+                            });
+                        }, 4000);
+                    } else {
+                        setTimeout(() => {
+                            window.location.href = redirectUrl;
+                        }, 4000);
+                    }
+                } else {
+                    showToast('设置已保存', 'success');
+                    location.reload();
+                }
+            } else if (response) {
+                const error = await response.json();
+                let errorMessage = '保存失败';
+                if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.error === 'https_config_incomplete') {
+                    errorMessage = '启用HTTPS，需HTTPS端口、SSL证书、SSL密钥同时配置';
+                } else if (error.error === 'ssl_crt_not_exists') {
+                    errorMessage = 'SSL证书文件不存在，请检查';
+                } else if (error.error === 'ssl_key_not_exists') {
+                    errorMessage = 'SSL密钥文件不存在，请检查';
+                } else if (error.error === 'network_logo_not_exists') {
+                    errorMessage = '站点Logo文件不存在，请检查';
+                } else if (error.error === 'port_in_use') {
+                    errorMessage = 'HTTP端口被占用';
+                } else if (error.error === 'https_port_in_use') {
+                    errorMessage = 'HTTPS端口被占用';
+                } else if (error.error === 'webdav_port_in_use') {
+                    errorMessage = 'HTTP WebDAV端口被占用';
+                } else if (error.error === 'webdav_https_port_in_use') {
+                    errorMessage = 'HTTPS WebDAV端口被占用';
+                } else if (error.error === 'webdav_https_port_required') {
+                    errorMessage = '启用HTTPS WebDAV需填写HTTPS WebDAV端口';
+                } else if (error.error === 'ssl_crt_required') {
+                    errorMessage = '启用HTTPS WebDAV需填写SSL证书路径';
+                } else if (error.error === 'ssl_key_required') {
+                    errorMessage = '启用HTTPS WebDAV需填写SSL密钥路径';
+                } else if (error.error === 'samba_port_required') {
+                    errorMessage = '启用Samba需要填写Samba端口';
+                } else if (error.error === 'samba_port_in_use') {
+                    errorMessage = 'Samba端口被占用';
+                } else if (error.error === 'ftp_port_required') {
+                    errorMessage = '启用FTP需要填写FTP端口';
+                } else if (error.error === 'ftp_passive_min_required') {
+                    errorMessage = '启用FTP需要填写被动端口最小值';
+                } else if (error.error === 'ftp_passive_max_required') {
+                    errorMessage = '启用FTP需要填写被动端口最大值';
+                } else if (error.error === 'ftp_port_in_use') {
+                    errorMessage = 'FTP端口被占用';
+                }
+                showToast(errorMessage, 'error');
+            }
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+        function setupModalClickOutside() {
+            document.querySelectorAll('.modal, .login-screen').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        if (modal.classList.contains('modal')) {
+                            modal.classList.remove('active');
+                        } else if (modal.classList.contains('login-screen')) {
+                            closeLoginScreen();
+                        }
+                    }
+                });
+            });
+        }
+        setupModalClickOutside();
+        function showToast(message, type = '', duration = 3000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type + ' show';
+            setTimeout(() => { toast.className = 'toast'; }, duration);
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+                document.getElementById('loginScreen').style.display = 'none';
+            }
+        });
+
+        let scrollHideTimer = null;
+        const scrollContainer = document.querySelector('.file-table-wrapper');
+        let isInFileList = false;
+
+        function showScrollbar() {
+            if (scrollContainer) {
+                scrollContainer.classList.add('custom-scrollbar');
+                clearTimeout(scrollHideTimer);
+                scrollHideTimer = setTimeout(() => {
+                    scrollContainer.classList.remove('custom-scrollbar');
+                }, 3000);
+            }
+        }
+
+        if (scrollContainer) {
+            scrollContainer.addEventListener('scroll', showScrollbar);
+            
+            scrollContainer.addEventListener('mouseenter', () => {
+                isInFileList = true;
+            });
+            
+            scrollContainer.addEventListener('mouseleave', () => {
+                isInFileList = false;
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') && isInFileList) {
+                showScrollbar();
+            }
+        });
+    </script>
+</body>
+</html>

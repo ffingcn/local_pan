@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  local_pan:
+    build: .
+    image: ffingcn/localpan:1.0.0
+    container_name: local_pan
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "5001:5001"
+      - "5002:5002"
+      - "21:21"
+      - "445:445"
+      - "50000-50050:50000-50050"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./config:/app/config
+      - ./logs:/app/logs
+      - ./ssl:/app/ssl
+      - ./img:/app/img
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      - local_pan_net
+    privileged: true
+
+
+networks:
+  local_pan_net:
+    driver: bridge

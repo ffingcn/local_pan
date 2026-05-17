@@ -1,0 +1,6 @@
+Flask==2.3.3
+Flask-Compress==1.13
+wsgidav==4.0.0
+cheroot==9.0.0
+pyftpdlib==2.2.0
+impacket==0.13.0
